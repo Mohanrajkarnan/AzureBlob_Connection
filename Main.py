@@ -45,18 +45,18 @@ def uploadToBlob(urlPath):
                         with gzip.open(zipFile, 'rb') as file_in:
                             flag +=1
                             unzipFileName = zipFile[:-3]
-                            with open(f'{unzipFileName}.csv', 'wb') as file_out:
+                            with open(f'{unzipFileName}', 'wb') as file_out:
                                 shutil.copyfileobj(file_in, file_out)
                             
                             #Uploading into blob
-                            with open(f'{unzipFileName}.csv', "r") as fl :
+                            with open(f'{unzipFileName}', "r") as fl :
                                 try:
                                     data = fl.read()
-                                    container_client.upload_blob(name = f"{year}/{unzipFileName}.csv", data=data,overwrite=False)
+                                    container_client.upload_blob(name = f"{year}/{unzipFileName}", data=data,overwrite=False)
                                 except ResourceExistsError :
-                                    print(f"{unzipFileName}.csv is already exists")
+                                    print(f"{unzipFileName} is already exists")
 
-                        os.remove(f'{unzipFileName}.csv')
+                        os.remove(f'{unzipFileName}')
                         os.remove(zipFile)
                         if flag >= 10:
                                 break
@@ -85,11 +85,12 @@ def readFromBlob():
                                         blob_name = blob_i,
                                         account_key=account_key,
                                         permission=BlobSasPermissions(read=True),
-                                        expiry=datetime.utcnow() + timedelta(hours=1))
+                                        expiry=datetime.now() + timedelta(hours=1))
             
-            if str(blob_i).endswith("csv"):
+            if str(blob_i).endswith(".op"):
                 sas_url = 'https://' + account_name+'.blob.core.windows.net/' + container_name + '/' + blob_i + '?' + sas_i
-                df = pd.read_csv(sas_url)
+                df = pd.read_fwf(sas_url)
+
                 df_list.append(df)
         
         df_combined = pd.concat(df_list, ignore_index=True)
@@ -100,8 +101,9 @@ def readFromBlob():
 
 
 if __name__ == "__main__":
-   uploadToBlob('https://www1.ncdc.noaa.gov/pub/data/gsod/')
+#    uploadToBlob('https://www1.ncdc.noaa.gov/pub/data/gsod/')
    df = readFromBlob()
+   print(df)
 
                        
                     
