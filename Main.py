@@ -99,11 +99,30 @@ def readFromBlob():
     except Exception as e:
         print(f"This failed because of this error : {e} ") 
 
+def dataClean(df):
+    # Dropping Unnamed columns
+    removeUnamedCol = [i for i in df.columns if "Unnamed" in i ]
+    df.drop(removeUnamedCol, axis=1,inplace=True)
+
+    # Renaming columns
+    df.rename(columns = {'STN---':'STN'}, inplace = True) 
+
+    # Imputing wildcard char
+    df['MAX'] = df['MAX'].str.replace('*', '')
+    df['MIX'] = df['MIX'].str.replace('*', '')
+
+    return df
+
+
 
 if __name__ == "__main__":
 #    uploadToBlob('https://www1.ncdc.noaa.gov/pub/data/gsod/')
    df = readFromBlob()
-   print(df)
+   print(dataClean(df))
+   
+
+
+
 
                        
                     
